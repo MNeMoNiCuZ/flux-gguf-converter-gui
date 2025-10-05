@@ -10,7 +10,7 @@ A tool with a graphical user interface (GUI) and command-line scripts for conver
 -   Monitor **CPU and GPU usage** during conversion.
 -   Option to **retain intermediate F16 files**.
 -   Specify a **custom directory for output files**.
--   **Command-line interface** for batch and single-file processing.
+-   **Command-line interface** for interactive and argument-based processing.
 
 ## Prerequisites & Installation
 
@@ -67,7 +67,7 @@ To ensure all Python scripts work correctly, you should create a single virtual 
     ```
 
 2.  **Apply Patch:**
-    *(Note: You must have the `lcpp.patch` file for this step).*
+    If you have a patch file (e.g., `lcpp.patch`), apply it using the following command:
     ```bash
     git apply lcpp.patch
     ```
@@ -104,14 +104,52 @@ To ensure all Python scripts work correctly, you should create a single virtual 
 
 Activate the virtual environment first by running `venv_activate.bat` inside the `llama.cpp` directory, then run the scripts from the `flux-gguf-converter-gui` directory.
 
-#### Batch Conversion
+#### Interactive Multi-File Conversion
+This script allows you to convert multiple models at once. If you run it without arguments, it will enter an interactive mode where you can specify the input models and output formats.
 ```bash
 python scripts/convert_safetensors_to_gguf.py
 ```
 
-#### Single File Conversion
+#### Argument-based Single-File Conversion
+This script is for converting a single model using command-line arguments to specify the input file and the desired output format.
 ```bash
 python scripts/convert_safetensors_to_gguf_single.py --input "C:\models\MyModel.safetensors" --output "Q4_K_S"
+```
+
+#### Command-Line Arguments and Examples
+
+##### `convert_safetensors_to_gguf.py`
+
+| Argument | Description | Example |
+| --- | --- | --- |
+| `--inputs` | One or more paths to the input `.safetensors` models. | `--inputs "C:\models\model1.safetensors" "C:\models\model2.safetensors"` |
+| `--outputs`| One or more quantization formats to output. | `--outputs Q4_K_S Q8_0` |
+
+**Windows Example:**
+```bash
+python scripts/convert_safetensors_to_gguf.py --inputs "C:\models\MyModel.safetensors" --outputs Q4_K_S Q8_0
+```
+
+**Linux Example:**
+```bash
+python scripts/convert_safetensors_to_gguf.py --inputs "/models/MyModel.safetensors" --outputs Q4_K_S Q8_0
+```
+
+##### `convert_safetensors_to_gguf_single.py`
+
+| Argument | Description | Example |
+| --- | --- | --- |
+| `--input` | The path to the input `.safetensors` model. | `--input "C:\models\MyModel.safetensors"` |
+| `--output`| The quantization format to output. | `--output Q4_K_S` |
+
+**Windows Example:**
+```bash
+python scripts/convert_safetensors_to_gguf_single.py --input "C:\models\MyModel.safetensors" --output Q4_K_S
+```
+
+**Linux Example:**
+```bash
+python scripts/convert_safetensors_to_gguf_single.py --input "/models/MyModel.safetensors" --output Q4_K_S
 ```
 
 ## Appendix
@@ -187,4 +225,4 @@ The following is a list of quantization types supported by `llama.cpp`:
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
