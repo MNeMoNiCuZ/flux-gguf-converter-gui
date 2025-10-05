@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 from typing import List, Dict, Callable
+import gguf
 
 def run_command(command: str, working_dir: str = None) -> None:
     try:
@@ -71,15 +72,11 @@ def process_models(plan: List[Dict], convert_script_dir: str, llama_quantize_exe
             continue
             
         try:
-            # Check if F16 exists and has non-zero size
-            if os.path.exists(f16_model) and os.path.getsize(f16_model) > 0:
-                update_progress(f"Using existing F16 file for model {model_idx}/{len(plan)}: {model_name}")
-                print(f"Using existing F16 file: {f16_model}")
-            else:
-                update_progress(f"Converting model {model_idx}/{len(plan)} to F16 as an intermediate step: {model_name}")
-                print(f"\nConverting to F16: {input_model}")
-                convert_command = f'python "{os.path.join(convert_script_dir, "convert.py")}" --src "{input_model}" --dst "{f16_model}"'
-                run_command(convert_command, working_dir=convert_script_dir)
+            # Always recreate F16 file to ensure correct architecture
+            update_progress(f"Converting model {model_idx}/{len(plan)} to F16 as an intermediate step: {model_name}")
+            print(f"\nConverting to F16: {input_model}")
+            convert_command = f'python "{os.path.join(convert_script_dir, "convert.py")}" --src "{input_model}" --dst "{f16_model}"'
+            run_command(convert_command, working_dir=convert_script_dir)
             
             # Verify F16 file exists and has size
             if not os.path.exists(f16_model) or os.path.getsize(f16_model) == 0:
