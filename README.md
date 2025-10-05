@@ -176,6 +176,15 @@ The following is a list of quantization types supported by `llama.cpp`:
           COPY    : only copy tensors, no quantizing
 ```
 
+## References
+
+-   [llama.cpp](https://github.com/ggerganov/llama.cpp): The underlying conversion and quantization tools are from this repository.
+-   [llama.cpp/src/llama-arch.h](https://github.com/ggerganov/llama.cpp/blob/master/src/llama-arch.h): The source file defining the supported model architectures in `llama.cpp`.
+
+## Acknowledgements
+
+-   [city96/ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF): The conversion script used in this project is based on the work from this repository. We acknowledge and appreciate their contribution to the open-source community.
+
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
