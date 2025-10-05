@@ -12,6 +12,8 @@ set LLAMA_CPP_DIR=llama.cpp
 if not exist "%LLAMA_CPP_DIR%" (
     echo ERROR: The `llama.cpp` directory was not found at `%LLAMA_CPP_DIR%`.
     echo Please ensure you have cloned `llama.cpp` inside the `flux-gguf-converter-gui` directory.
+    echo You can do this by running the following command in this directory:
+    echo git clone https://github.com/ggerganov/llama.cpp.git
     goto end
 )
 
@@ -29,22 +31,50 @@ setlocal enabledelayedexpansion
 
 :: Initialize counter
 set COUNT=0
+set DEFAULT_PYTHON_PATH=
+set DEFAULT_PYTHON_NUM=
 
-:: Directly parse the output of py -0p to get versions and their paths
+:: Display the found Python versions
+echo --------------------
+echo Found Python Versions
+echo --------------------
+
 for /f "tokens=1,*" %%a in ('py -0p') do (
-    :: Filter lines that start with a dash, indicating a Python version, and capture the path
     echo %%a | findstr /R "^[ ]*-" > nul && (
         set /a COUNT+=1
-        set "pythonVersion=%%a"
-        :: a quick, dirty but understandable solution
-        set "pythonVersion=!pythonVersion:-32=!!"
-        set "pythonVersion=!pythonVersion:-64=!!"
-        set "pythonVersion=!pythonVersion:-=!!"
-        set "pythonVersion=!pythonVersion:V:=!!"
-        set "PYTHON_VER_!COUNT!=!pythonVersion!"
-        set "PYTHON_PATH_!COUNT!=%%b"  :: Store the path in a separate variable
+        set "version=%%a"
+        set "rest=%%b"
+
+        set "version=!version:-32=!!"
+        set "version=!version:-64=!!"
+        set "version=!version:-=!!"
+        set "version=!version:V:=!!"
+        set "PYTHON_VER_!COUNT!=!version!"
+
+        set "path_part=!rest!"
+        echo !rest! | findstr /C:"*" > nul
+        if !errorlevel! equ 0 (
+            for /f "tokens=1,*" %%x in ("!rest!") do (
+                set "PYTHON_PATH_!COUNT!=%%y"
+                set "DEFAULT_PYTHON_PATH=%%y"
+                set "DEFAULT_PYTHON_NUM=!COUNT!"
+            )
+        ) else (
+            for /f "tokens=*" %%x in ("!path_part!") do (
+                set "PYTHON_PATH_!COUNT!=%%x"
+            )
+        )
     )
 )
+
+for /l %%i in (1, 1, %COUNT%) do (
+    set "default_label="
+    if "%%i" == "!DEFAULT_PYTHON_NUM!" (
+        set "default_label= (default)"
+    )
+    echo %%i. !PYTHON_VER_%%i!!default_label! - !PYTHON_PATH_%%i!
+)
+echo.
 
 :: Make sure at least one Python version was found
 if %COUNT%==0 (
@@ -52,7 +82,35 @@ if %COUNT%==0 (
     goto end
 )
 
-:: ... (rest of the python version selection logic is unchanged) ...
+:: Prompt user to select a Python version
+:select_version
+set "SELECTED_NUM="
+set /p "SELECTED_NUM=Enter the number of the Python version to use (Press Enter for default): "
+
+if not defined SELECTED_NUM (
+    if defined DEFAULT_PYTHON_PATH (
+        set "SELECTED_PYTHON_PATH=!DEFAULT_PYTHON_PATH!"
+    ) else (
+        echo No default Python version found. Please select one from the list.
+        goto select_version
+    )
+) else (
+    set /a "num_val=0"
+    set /a "num_val=!SELECTED_NUM!"
+    if !num_val! equ 0 (
+        echo Invalid selection. Please try again.
+        goto select_version
+    )
+    if !num_val! gtr %COUNT% (
+        echo Invalid selection. Please try again.
+        goto select_version
+    )
+    if !num_val! lss 1 (
+        echo Invalid selection. Please try again.
+        goto select_version
+    )
+    set "SELECTED_PYTHON_PATH=!PYTHON_PATH_%SELECTED_NUM%!"
+)
 
 :: Prompt for virtual environment name with default 'venv'
 echo ------------------------
@@ -69,7 +127,7 @@ set VENV_PATH=%LLAMA_CPP_DIR%\%VENV_NAME%
 echo.
 echo Creating virtual environment at %VENV_PATH%...
 
-py -%SELECTED_PYTHON_VER% -m venv "%VENV_PATH%"
+"%SELECTED_PYTHON_PATH%" -m venv "%VENV_PATH%"
 
 :: Add .gitignore to the virtual environment folder
 echo Creating .gitignore in the %VENV_PATH% folder...
@@ -99,12 +157,21 @@ echo Generating venv_update.bat for a one-time pip upgrade...
     echo @echo off
     echo cd %%~dp0
     echo echo Activating virtual environment %VENV_NAME% and upgrading pip...
-    echo call "%VENV_PATH%\Scripts\activate"
-    echo "%VPATH%\Scripts\python.exe" -m pip install --upgrade pip
+    echo call "%%VENV_PATH%%\Scripts\activate"
+    echo "%%VENV_PATH%%\Scripts\python.exe" -m pip install --upgrade pip
     echo echo Pip has been upgraded in the virtual environment %VENV_NAME%.
     echo echo To deactivate, manually type 'deactivate'.
 ) > "%LLAMA_CPP_DIR%\venv_update.bat"
 
+:: Create build directory
+if not exist "%LLAMA_CPP_DIR%\\build" (
+    echo Creating build directory in %LLAMA_CPP_DIR%...
+    mkdir "%LLAMA_CPP_DIR%\\build"
+)
+
+:: Copy convert.py to llama.cpp directory
+echo Copying convert.py to %LLAMA_CPP_DIR%...
+copy "%~dp0scripts\\convert.py" "%LLAMA_CPP_DIR%\\convert.py" >nul
 
 :: Activate the new environment to install packages
 call "%VENV_PATH%\Scripts\activate.bat"
@@ -164,9 +231,9 @@ if exist "%GUI_REQS_PATH%" (
 if exist "%LLAMA_REQS_PATH%" (
     echo llama.cpp requirements.txt found.
     if "!UV_INSTALLED!"=="1" (
-        uv pip install -r "%LLAMA_REQS_PATH%"
+        uv pip install -r "%LLAMA_REQS_PATH%" --prerelease=allow
     ) else (
-        pip install -r "%LLAMA_REQS_PATH%"
+        pip install --pre -r "%LLAMA_REQS_PATH%"
     )
 ) else (
     echo llama.cpp requirements.txt not found. Skipping.
@@ -184,6 +251,28 @@ echo.
 echo Setup complete. Your virtual environment is ready in the %LLAMA_CPP_DIR% folder.
 echo To activate it in the future, run venv_activate.bat from the %LLAMA_CPP_DIR% folder.
 echo To deactivate the virtual environment, type 'deactivate'.
+echo.
+echo IMPORTANT: You need to manually install PyTorch.
+echo Please visit https://pytorch.org/get-started/locally/ for instructions.
+echo Activate your virtual environment before installing PyTorch.
+
+echo.
+echo -------------------------
+echo Compilation Instructions
+echo -------------------------
+echo The 'build' directory has been created for you inside 'llama.cpp'.
+echo To compile the project, you will need to have CMake and a C++ compiler installed.
+echo If you have Visual Studio 2022 installed with the "Desktop development with C++" workload, you are ready to compile.
+echo.
+echo 1. Open a new terminal or command prompt.
+echo 2. Navigate to the build directory:
+echo    cd llama.cpp\build
+echo 3. Configure the build:
+echo    cmake .. -DLLAMA_CURL=OFF
+echo 4. Compile the 'llama-quantize' tool:
+echo    cmake --build . --config Debug -j10 --target llama-quantize
+echo.
+echo After compilation, you will find 'llama-quantize.exe' in the 'llama.cpp\build\bin\Debug' directory.
 
 :: Keep the command prompt open
 cmd /k

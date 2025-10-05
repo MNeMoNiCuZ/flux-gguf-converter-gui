@@ -53,32 +53,48 @@ To ensure all Python scripts work correctly, you should create a single virtual 
     ```
     Follow the on-screen prompts. This will create a `venv` folder inside `llama.cpp` and install the required packages from `requirements.txt` (for this GUI) and `llama.cpp/requirements.txt`.
 
-### Step 3: Patch and Compile `llama.cpp`
-
-1.  **Navigate into the `llama.cpp` directory:**
+2.  **Copy `convert.py`:**
+    The `flux-gguf-converter-gui` project expects a `convert.py` script to be present in the `llama.cpp` directory for model conversion. This script is provided in the `scripts` directory of this project.
     ```bash
-    cd llama.cpp 
+    copy scripts\convert.py llama.cpp\convert.py
     ```
 
-2.  **Apply Patch:**
-    If you have a patch file (e.g., `lcpp.patch`), apply it using the following command:
+3.  **Manually Install PyTorch:**
+    `torch` cannot be installed directly via `requirements.txt` due to its specific system and CUDA requirements. Please visit the official PyTorch website ([https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)) and follow their instructions to install the correct version of PyTorch for your system and CUDA setup.
+
+    Activate your virtual environment before installing PyTorch:
     ```bash
-    git apply lcpp.patch
+    cd llama.cpp
+    venv_activate.bat
+    # Then run the appropriate pip install command from the PyTorch website
+    # Example for CUDA 12.1:
+    # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
     ```
 
-3.  **Compile `llama.cpp`:**
-    The recommended method is using `cmake`.
-    ```bash
-    # Create a build directory
-    mkdir build
-    cd build
+3.  **Manually Install PyTorch:**
+    `torch` cannot be installed directly via `requirements.txt` due to its specific system and CUDA requirements. Please visit the official PyTorch website ([https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)) and follow their instructions to install the correct version of PyTorch for your system and CUDA setup.
 
-    # Configure the build
+    Activate your virtual environment before installing PyTorch:
+    ```bash
+    cd llama.cpp
+    venv_activate.bat
+    # Then run the appropriate pip install command from the PyTorch website
+    # Example for CUDA 12.1:
+    # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    ```
+
+### Step 3: Compile `llama.cpp`
+
+After the virtual environment is set up, you need to compile `llama.cpp`. The `venv_create.bat` script will automatically create the `build` directory for you inside `llama.cpp`.
+
+1.  **Navigate into the build directory:**
+    ```bash
+    cd llama.cpp\build
+    ```
+
+2.  **Configure and compile the `llama-quantize` tool:**
+    ```bash
     cmake ..
-
-    # Compile the quantize tool. 
-    # We use the Debug config because the scripts are configured to look for the executable in the .../bin/Debug/ directory.
-    # The -j flag speeds up compilation by using multiple cores.
     cmake --build . --config Debug -j10 --target llama-quantize
     ```
 
@@ -201,6 +217,27 @@ The following is a list of quantization types supported by `llama.cpp`:
    0  or  F32     : 26.00G              @ 7B
           COPY    : only copy tensors, no quantizing
 ```
+
+## Troubleshooting
+
+### ModuleNotFoundError: No module named 'gguf' or 'packaging'
+
+If you encounter these errors when running the GUI or conversion scripts, required packages are not installed in your virtual environment.
+
+**Solution:**
+1. Ensure you have run `venv_create.bat` to set up the virtual environment and install all required dependencies.
+2. If the error persists, manually install the missing packages:
+   ```bash
+   cd llama.cpp
+   venv_activate.bat
+   pip install gguf packaging
+   ```
+
+### Other Issues
+
+- Ensure `llama-quantize.exe` is compiled and located in `llama.cpp/build/bin/Debug/`.
+- Verify that PyTorch is installed with the correct CUDA version for your system.
+- Check that all paths in the scripts are correct for your system.
 
 ## References
 

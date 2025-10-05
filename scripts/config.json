@@ -16,7 +16,7 @@
         "Q5_K_S": false,
         "Q5_K_M": false,
         "Q6_K": false,
-        "Q8_0": true,
+        "Q8_0": false,
         "F16": false,
         "BF16": false,
         "F32": false,
