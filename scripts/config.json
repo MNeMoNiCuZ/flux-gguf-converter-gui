@@ -1,0 +1,27 @@
+{
+    "selected_formats": {
+        "Q2_K": false,
+        "Q2_K_S": false,
+        "Q3_K_S": false,
+        "Q3_K_M": false,
+        "Q3_K_L": false,
+        "Q4_0": false,
+        "Q4_1": false,
+        "Q4_K": false,
+        "Q4_K_S": true,
+        "Q4_K_M": false,
+        "Q5_0": false,
+        "Q5_1": false,
+        "Q5_K": false,
+        "Q5_K_S": false,
+        "Q5_K_M": false,
+        "Q6_K": false,
+        "Q8_0": true,
+        "F16": false,
+        "BF16": false,
+        "F32": false,
+        "COPY": false
+    },
+    "keep_f16": false,
+    "output_path": "Leave empty to use input file's directory"
+}
