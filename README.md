@@ -149,13 +149,13 @@ The conversion is a two-step process handled automatically by the scripts:
 1.  **Convert `.safetensors` to a temporary `F16.gguf` file:**
     This is done by `llama.cpp`'s `convert.py` script.
     ```bash
-    python convert.py --src H:\AI\Models\MyModel.safetensors
+    python convert.py --src C:\AI\Models\MyModel.safetensors
     ```
 
 2.  **Quantize the `F16.gguf` file to the final target format:**
     This is done by the `llama-quantize` executable you compiled.
     ```bash
-    build\bin\Debug\llama-quantize.exe H:\AI\Models\MyModel-F16.gguf H:\AI\Models\MyModel-Q4_K_S.gguf Q4_K_S
+    build\bin\Debug\llama-quantize.exe C:\AI\Models\MyModel-F16.gguf C:\AI\Models\MyModel-Q4_K_S.gguf Q4_K_S
     ```
 
 ### Available Quantization Types
