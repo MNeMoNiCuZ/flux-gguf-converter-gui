@@ -1,6 +1,6 @@
 # Flux GGUF Converter
 
-A tool with a graphical user interface (GUI) and command-line scripts for converting Flux-based SAFETENSOR models to the GGUF format, using `llama.cpp` for quantization.
+A tool with a graphical user interface (GUI) and command-line scripts for converting Flux-based SAFETENSOR models to the GGUF format, using [llama.cpp](https://github.com/ggerganov/llama.cpp) for quantization.
 
 ## Features
 
@@ -21,10 +21,11 @@ The setup process involves three main steps: cloning the required repositories, 
 1.  **Clone this project (`flux-gguf-converter-gui`):**
     ```bash
     git clone <repository-url>
+    cd flux-gguf-converter-gui
     ```
 
 2.  **Clone `llama.cpp`:**
-    It is crucial that you clone `llama.cpp` into the same parent directory, so the two project folders are side-by-side.
+    It is crucial that you clone `llama.cpp` into the `flux-gguf-converter-gui` directory.
     ```bash
     git clone https://github.com/ggerganov/llama.cpp.git
     ```
@@ -32,28 +33,21 @@ The setup process involves three main steps: cloning the required repositories, 
 Your folder structure should look like this:
 
 ```
-/your-main-folder/
-|-- flux-gguf-converter-gui/
-|   |-- scripts/
-|   |-- launch_converter_gui.bat
-|   |-- ...
-|
+/flux-gguf-converter-gui/
+|-- scripts/
 |-- llama.cpp/
-    |-- build/
-    |-- ...
+|   |-- build/
+|   |-- ...
+|-- launch_converter_gui.bat
+|-- ...
 ```
 
 ### Step 2: Create Virtual Environment & Install Dependencies
 
 To ensure all Python scripts work correctly, you should create a single virtual environment inside the `llama.cpp` directory and install the requirements for both projects into it.
 
-1.  **Navigate into the `flux-gguf-converter-gui` directory:**
-    ```bash
-    cd flux-gguf-converter-gui
-    ```
-
-2.  **Run the venv creation script:**
-    This script is configured to create the virtual environment inside the adjacent `llama.cpp` folder.
+1.  **Run the venv creation script:**
+    This script is configured to create the virtual environment inside the `llama.cpp` folder within the project directory.
     ```bash
     venv_create.bat
     ```
@@ -63,7 +57,7 @@ To ensure all Python scripts work correctly, you should create a single virtual 
 
 1.  **Navigate into the `llama.cpp` directory:**
     ```bash
-    cd ../llama.cpp 
+    cd llama.cpp 
     ```
 
 2.  **Apply Patch:**
@@ -108,12 +102,6 @@ Activate the virtual environment first by running `venv_activate.bat` inside the
 This script allows you to convert multiple models at once. If you run it without arguments, it will enter an interactive mode where you can specify the input models and output formats.
 ```bash
 python scripts/convert_safetensors_to_gguf.py
-```
-
-#### Argument-based Single-File Conversion
-This script is for converting a single model using command-line arguments to specify the input file and the desired output format.
-```bash
-python scripts/convert_safetensors_to_gguf_single.py --input "C:\models\MyModel.safetensors" --output "Q4_K_S"
 ```
 
 #### Command-Line Arguments and Examples

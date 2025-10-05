@@ -6,12 +6,12 @@ echo VENV Installation Script - Helps you create a virtual environment
 echo -----------------------------------------------------------------
 
 :: Define the relative path for the llama.cpp directory
-set LLAMA_CPP_DIR=..\llama.cpp
+set LLAMA_CPP_DIR=llama.cpp
 
 :: Check if the llama.cpp directory exists
 if not exist "%LLAMA_CPP_DIR%" (
     echo ERROR: The `llama.cpp` directory was not found at `%LLAMA_CPP_DIR%`.
-    echo Please ensure `llama.cpp` and this project folder are in the same parent directory.
+    echo Please ensure you have cloned `llama.cpp` inside the `flux-gguf-converter-gui` directory.
     goto end
 )
 
@@ -100,7 +100,7 @@ echo Generating venv_update.bat for a one-time pip upgrade...
     echo cd %%~dp0
     echo echo Activating virtual environment %VENV_NAME% and upgrading pip...
     echo call "%VENV_PATH%\Scripts\activate"
-    echo "%VENV_PATH%\Scripts\python.exe" -m pip install --upgrade pip
+    echo "%VPATH%\Scripts\python.exe" -m pip install --upgrade pip
     echo echo Pip has been upgraded in the virtual environment %VENV_NAME%.
     echo echo To deactivate, manually type 'deactivate'.
 ) > "%LLAMA_CPP_DIR%\venv_update.bat"
@@ -147,8 +147,8 @@ echo.
 echo ------------------------------------------------------
 echo Installing dependencies from requirements.txt files...
 
-set GUI_REQS_PATH=..\flux-gguf-converter-gui\requirements.txt
-set LLAMA_REQS_PATH=.\requirements.txt
+set GUI_REQS_PATH=requirements.txt
+set LLAMA_REQS_PATH=llama.cpp\requirements.txt
 
 if exist "%GUI_REQS_PATH%" (
     echo GUI requirements.txt found.
